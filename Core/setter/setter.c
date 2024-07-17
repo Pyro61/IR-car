@@ -146,7 +146,7 @@ void change_light_turnleft(void)
 	else
 	{
 		light_setoff_turnleft();
-		soundsignal_on_turn();
+		soundsignal_off_turn();
 		light_turnleft_state = OFF;
 	}
 }
