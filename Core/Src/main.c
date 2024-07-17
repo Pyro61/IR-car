@@ -28,7 +28,6 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "light.h"
-#include "ws2812b.h"
 #include "driver_soundsignal.h" // do testów, pozniej sam piloting w mainie
 #include "driver_distsensor.h"
 #include "distsensor.h"
@@ -36,6 +35,7 @@
 #include "motor.h"
 #include "setter.h"
 #include "ir_remote/ir_remote.h"
+#include "soundsignal.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -70,85 +70,11 @@ void SystemClock_Config(void);
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-/*	if(mode >= 5)
-	{
-		mode = 0;
-	}
-	switch(mode)
-	{
-	case 0:
-		driver_soundsignal_on_horn();
-		break;
-	case 1:
-		driver_soundsignal_on_turn();
-		break;
-	case 2:
-		driver_soundsignal_on_emergencylights();
-		break;
-	case 3:
-		driver_soundsignal_on_distsensorblock();
-		break;
-	case 4:
-		driver_soundsignal_on_lowbattery();
-		break;
-	}
-	mode++;
-*/
 
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if (&htim6 == htim)
-	{
-		if(on_off_soundsignal_tim == 0)
-		{
-			driver_soundsignal_boardhw_stop_soundsignal_tim();
-			on_off_soundsignal_tim = !on_off_soundsignal_tim;
-		}
-
-		else
-		{
-			driver_soundsignal_boardhw_start_soundsignal_tim();
-			on_off_soundsignal_tim = !on_off_soundsignal_tim;
-		}
-		switch(priority)
-		{
-		case 1:
-			if(on_off_soundsignal_tim == 0)
-			{
-				__HAL_TIM_SET_PRESCALER(&htim6, 5999);
-			}
-			else
-			{
-				__HAL_TIM_SET_PRESCALER(&htim6, 1999);
-			}
-			break;
-		case 2:
-			if(on_off_soundsignal_tim == 0)
-			{
-				__HAL_TIM_SET_PRESCALER(&htim6, 3999);
-			}
-			else
-			{
-				__HAL_TIM_SET_PRESCALER(&htim6, 1999);
-			}
-			break;
-		case 5:
-			if(on_off_soundsignal_tim == 0)
-			{
-				__HAL_TIM_SET_PRESCALER(&htim6, 50000);
-			}
-			else
-			{
-				__HAL_TIM_SET_PRESCALER(&htim6, 10000);
-			}
-			break;
-		default:
-			break;
-		}
-	}
-
 	/* Front distance sensor measurement end */
 	if (&htim8 == htim)
 	{
@@ -211,7 +137,6 @@ int main(void)
   MX_SPI2_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
-  MX_TIM6_Init();
   MX_TIM4_Init();
   MX_TIM8_Init();
   MX_SPI3_Init();
@@ -223,6 +148,7 @@ int main(void)
   light_initall();
   ir_remote_init();
   motor_initall();
+  soundsignal_init();
   distsensor_initall(15.0f, 15.0f);
 
   /* USER CODE END 2 */
