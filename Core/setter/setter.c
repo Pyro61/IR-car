@@ -5,6 +5,7 @@
 #include "soundsignal.h"
 #include "safe_state.h"
 #include <stdbool.h>
+#include "gpio.h"
 
 enum state
 {
@@ -21,6 +22,7 @@ enum state horn_state = OFF;
 
 static bool can_drive_forward = true;
 static bool can_drive_backwards = true;
+
 
 static enum motor_direction drive_direction = MOTOR_DIRECTION_STOP;
 
@@ -44,6 +46,13 @@ void accelerate_forward_to_max_if_can_drive(void)
 
 		light_setoff_stopback();
 		light_setoff_reversingback();
+
+		soundsignal_off_distsensorblock();
+	}
+
+	else
+	{
+		soundsignal_on_distsensorblock();
 	}
 }
 
@@ -58,6 +67,13 @@ void accelerate_backwards_to_max_if_can_drive(void)
 
 		light_setoff_stopback();
 		light_seton_reversingback();
+
+		soundsignal_off_distsensorblock();
+	}
+
+	else
+	{
+		soundsignal_on_distsensorblock();
 	}
 }
 
@@ -92,65 +108,81 @@ void change_light_normal(void)
 
 void change_light_turnright(void)
 {
-	if (OFF == light_turnright_state)
-		{
-			light_seton_turnright();
-			light_turnright_state = ON;
-		}
+	if (ON == light_turnleft_state)
+	{
+		return;
+	}
 
-		else
-		{
-			light_setoff_turnright();
-			light_turnright_state = OFF;
-		}
+	if (OFF == light_turnright_state)
+	{
+		light_seton_turnright();
+		soundsignal_on_turn();
+		light_turnright_state = ON;
+	}
+
+	else
+	{
+		light_setoff_turnright();
+		soundsignal_off_turn();
+		light_turnright_state = OFF;
+	}
 }
 
 
 void change_light_turnleft(void)
 {
+	if (ON == light_turnright_state)
+	{
+		return;
+	}
+
 	if (OFF == light_turnleft_state)
 		{
 			light_seton_turnleft();
+			soundsignal_on_turn();
 			light_turnleft_state = ON;
 		}
 
-		else
-		{
-			light_setoff_turnleft();
-			light_turnleft_state = OFF;
-		}
+	else
+	{
+		light_setoff_turnleft();
+		soundsignal_on_turn();
+		light_turnleft_state = OFF;
+	}
 }
 
 
 void change_light_emergency(void)
 {
 	if (OFF == light_emergency_state)
-		{
-			light_seton_emergencyall();
-			light_emergency_state = ON;
-		}
+	{
+		light_seton_emergencyall();
+		soundsignal_on_emergency();
+		light_emergency_state = ON;
+	}
 
-		else
-		{
-			light_setoff_emergencyall();
-			light_emergency_state = OFF;
-		}
+	else
+	{
+		light_setoff_emergencyall();
+		soundsignal_off_emergency();
+		light_emergency_state = OFF;
+	}
 }
 
 
 void horn(void)
 {
 	if (OFF == horn_state)
-		{
-			soundsignal_on_horn();
-			horn_state = ON;
-		}
+	{
+		soundsignal_on_horn();
+		horn_state = ON;
+	}
 
-		else
-		{
-			soundsignal_off_horn();
-			horn_state = OFF;
-		}
+	else
+	{
+		soundsignal_off_horn();
+		horn_state = OFF;
+	}
 }
 
 
@@ -188,4 +220,5 @@ void check_distance_from_obstacles_and_eventually_stop_motors()
 	{
 		can_drive_backwards = true;
 	}
+
 }
