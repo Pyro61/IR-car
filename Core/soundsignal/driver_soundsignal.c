@@ -1,10 +1,17 @@
+/* Module include */
 #include "driver_soundsignal.h"
-#include "tim.h"
+
+/* Other module includes */
 #include "event.h"
+
+/* Board hardware include */
+#include "tim.h"
+
+/* Standard library includes */
 #include <stdint.h>
 #include <stdbool.h>
 
-
+/* Defines */
 #define DELAY_PRESCALER_MULTIPLIER          10
 #define DELAY_PRESCALER_CALC(delay)         ((delay * DELAY_PRESCALER_MULTIPLIER) - 1)
 
@@ -13,6 +20,11 @@
 #define PRESCALER_EMERGENCY					1700
 #define PRESCALER_DISTSENSORSBLOCK			400
 
+/* Typedefs */
+typedef uint32_t prescaler_t;
+
+/* Enum declarations */
+/* Higher number = higher priority */
 enum priority
 {
 	PRIORITY_NONE 			 = 0,
@@ -22,32 +34,38 @@ enum priority
 	PRIORITY_HORN			 = 4
 };
 
-typedef uint32_t prescaler_t;
-
+/* Variables */
 static enum priority priority = PRIORITY_NONE;
-volatile bool on_off_soundsignal_tim;
 
-
+/* Static function definitions */
+/* Changing tim prescaler function */
 static void driver_soundsignal_boardhw_set_timprescaler(prescaler_t value)
 {
     __HAL_TIM_SET_PRESCALER(&htim3, value);
 }
 
 
-void driver_soundsignal_boardhw_start_soundsignal_tim(void)
+/* Static function definitions */
+/* Starting pwm function */
+static void driver_soundsignal_boardhw_start_soundsignal_tim(void)
 {
     HAL_TIM_Base_Start(&htim3);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 }
 
 
-void driver_soundsignal_boardhw_stop_soundsignal_tim(void)
+/* Stopping pwm function */
+static void driver_soundsignal_boardhw_stop_soundsignal_tim(void)
 {
 	HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
     HAL_TIM_Base_Stop(&htim3);
 }
 
 
+/* Function definitions */
+/* Turning on sound signal functions
+ * If priority of signal is higher than current priority (currently playing signal) change the settings and play that signal
+ * If current priority is higher than signal's priority, do nothing */
 void driver_soundsignal_on_horn(void)
 {
     if (PRIORITY_HORN >= priority)
@@ -92,6 +110,8 @@ void driver_soundsignal_on_distsensorblock(void)
 }
 
 
+/* Turning off sound signal functions
+ * If priotity isn't equal to that signal priority, don't turn off the pwm */
 void driver_soundsignal_off_horn(void)
 {
 	if (PRIORITY_HORN == priority)
@@ -130,6 +150,3 @@ void driver_soundsignal_off_distsensorblock(void)
 		priority = PRIORITY_NONE;
 	}
 }
-
-
-
