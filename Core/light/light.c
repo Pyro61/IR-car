@@ -3,13 +3,35 @@
 #include "event.h"
 #include <stdbool.h>
 
-struct light light_frontright;
-struct light light_frontleft;
-struct light light_backright;
-struct light light_backleft;
+/* Standard library include */
+#include <stdint.h>
 
-bool are_lights_sets_changed = true;
+/* Typedefs */
+typedef uint8_t light_mode_t;
 
+/* Structure declarations */
+struct light
+{
+    light_mode_t normal:1;
+    light_mode_t reversing:1;
+    light_mode_t stop:1;
+    light_mode_t turn:1;
+    light_mode_t emergency:1;
+    light_mode_t turn_activate:1;
+    light_mode_t emergency_activate:1;
+};
+
+/* Variables */
+static bool are_lights_sets_changed = true;
+
+/* Structures */
+static struct light light_frontright;
+static struct light light_frontleft;
+static struct light light_backright;
+static struct light light_backleft;
+
+/* Static function definitions */
+/* Init function */
 static void light_init(struct light *light)
 {
     light -> normal = 0;
@@ -22,6 +44,7 @@ static void light_init(struct light *light)
 }
 
 
+/* Setting functions */
 static void light_setnormal(struct light *light, bool set)
 {
     light -> normal = set;
@@ -52,6 +75,88 @@ static void light_setemergency(struct light *light, bool set)
 }
 
 
+/* Change turn light set if activated function */
+static void light_turnchange(struct light *light)
+{
+	if (1 == (light -> turn_activate))
+	{
+		light -> turn = !(light -> turn);
+
+		are_lights_sets_changed	= true;
+	}
+
+	/* Turn off turn light in case it was on after deactivating emergency change */
+	else
+	{
+		light -> turn = 0;
+
+		are_lights_sets_changed	= true;
+	}
+}
+
+
+/* Change emergency light set if activated function */
+static void light_emergencychange(struct light *light)
+{
+	if (1 == (light -> emergency_activate))
+	{
+		light -> emergency = !(light -> emergency);
+
+		are_lights_sets_changed	= true;
+	}
+
+	/* Turn off emergency light in case it was on after deactivating emergency change */
+	else
+	{
+		light -> emergency = 0;
+
+		are_lights_sets_changed	= true;
+	}
+}
+
+
+/* Change right turn lights sets function */
+static void light_turnchange_right(void)
+{
+	light_turnchange(&light_frontright);
+	light_turnchange(&light_backright);
+}
+
+
+/* Change left turn lights sets function */
+static void light_turnchange_left(void)
+{
+	light_turnchange(&light_frontleft);
+	light_turnchange(&light_backleft);
+}
+
+
+/* Change emergency lights sets function */
+static void light_emergencychange_all(void)
+{
+	light_emergencychange(&light_frontright);
+	light_emergencychange(&light_frontleft);
+	light_emergencychange(&light_backright);
+	light_emergencychange(&light_backleft);
+}
+
+
+/* Reading set from one light and send to hardware driver function */
+static void light_readset(struct light *light, enum light_id id)
+{
+	uint8_t set = 0;
+
+	set = (light -> normal) << 0;
+	set = set | (light -> reversing) << 1;
+	set = set | (light -> stop) << 2;
+	set = set | (light -> turn) << 3;
+	set = set | (light -> emergency) << 4;
+
+	driver_light_setlight(set, id);
+}
+
+/* Function definitions */
+/* Setting functions */
 void light_seton_normalfront(void)
 {
     light_setnormal(&light_frontright, 1);
@@ -164,20 +269,7 @@ void light_setoff_emergencyall(void)
 }
 
 
-static void light_readset(struct light *light, enum light_id id)
-{
-	uint8_t set = 0;
-
-	set = (light -> normal) << 0;
-	set = set | (light -> reversing) << 1;
-	set = set | (light -> stop) << 2;
-	set = set | (light -> turn) << 3;
-	set = set | (light -> emergency) << 4;
-
-	driver_light_setlight(set, id);
-}
-
-
+/* Reading light sets and send to hardware driver function */
 void light_readset_all_if_changed_and_send_sets(void)
 {
 	if (false == are_lights_sets_changed)
@@ -194,82 +286,27 @@ void light_readset_all_if_changed_and_send_sets(void)
 }
 
 
-static void light_turnchange(struct light *light)
+/* Sending completed callback function */
+void light_sending_completed_callback(void)
 {
-	if (1 == (light -> turn_activate))
-	{
-		light -> turn = !(light -> turn);
-
-		are_lights_sets_changed	= true;
-	}
-
-	else
-	{
-		light -> turn = 0;
-
-		are_lights_sets_changed	= true;
-	}
+	driver_light_sending_completed();
+	are_lights_sets_changed = false;
 }
 
 
-static void light_emergencychange(struct light *light)
-{
-	if (1 == (light -> emergency_activate))
-	{
-		light -> emergency = !(light -> emergency);
-
-		are_lights_sets_changed	= true;
-	}
-
-	/* Turn off emergency light in case it was on after deactivating emergency change */
-	else
-	{
-		light -> emergency = 0;
-
-		are_lights_sets_changed	= true;
-	}
-}
-
-
-static void light_turnchange_right(void)
-{
-	light_turnchange(&light_frontright);
-	light_turnchange(&light_backright);
-}
-
-
-static void light_turnchange_left(void)
-{
-	light_turnchange(&light_frontleft);
-	light_turnchange(&light_backleft);
-}
-
-
-static void light_emergencychange_all(void)
-{
-	light_emergencychange(&light_frontright);
-	light_emergencychange(&light_frontleft);
-	light_emergencychange(&light_backright);
-	light_emergencychange(&light_backleft);
-}
-
-
+/* Init function */
+/* Every 500ms turn lights are changed if activated */
+/* Every 300ms emergency lights are changed if activated */
 void light_initall(void)
 {
     light_init(&light_frontright);
     light_init(&light_frontleft);
     light_init(&light_backright);
     light_init(&light_backleft);
+
     subscribe_500ms(&light_turnchange_right);
     subscribe_500ms(&light_turnchange_left);
     subscribe_300ms(&light_emergencychange_all);
 
     driver_light_init();
-}
-
-
-void light_sending_complete(void)
-{
-	driver_light_sending_complete();
-	are_lights_sets_changed = false;
 }

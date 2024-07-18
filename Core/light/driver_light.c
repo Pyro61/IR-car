@@ -1,7 +1,13 @@
+/* Module header include */
 #include "driver_light.h"
-#include "ws2812b.h"
+
+/*  HW submodule include */
+#include "ws2812b/ws2812b.h"
+
+/* Standard library include */
 #include <stdio.h>
 
+/* Defines */
 /* Light modes bit codes */
 #define NORMAL_CODE				0x01
 #define REVERSING_CODE			0x02
@@ -29,9 +35,10 @@
 /* Amount of light modes */
 #define LIGHT_MODES				5
 
+/* Typedefs */
 typedef void (*driver_lightset_funptr)(void);
 
-
+/* Static function definitions */
 /* LEDs coding functions
  * Before "_" :
  * fr - front right lamp
@@ -152,8 +159,8 @@ static const driver_lightset_funptr driver_lightset_funptr_table[4][5] = {{fr_no
 																		 {NULL, bl_reversing, bl_stop, bl_turn, bl_emergency},
 																		 {NULL, br_reversing, br_stop, br_turn, br_emergency}};
 
-
-/* Function that read set from lamp and sets the LEDs */
+/* Function definitions */
+/* Reading set from lamp and sets the LEDs function */
 void driver_light_setlight(uint8_t set, enum light_id id)
 {
 	/* Wait for the transmit end - for not overwriting the buffer */
@@ -170,18 +177,22 @@ void driver_light_setlight(uint8_t set, enum light_id id)
 	}
 }
 
+
+/* Sending light codes function */
 void driver_light_send_sets(void)
 {
 	ws2812b_send();
 }
 
 
-void driver_light_sending_complete(void)
+/* End of sending function */
+void driver_light_sending_completed(void)
 {
 	ws2812b_end_of_transmit();
 }
 
 
+/* Init function */
 void driver_light_init(void)
 {
 	ws2812b_init();

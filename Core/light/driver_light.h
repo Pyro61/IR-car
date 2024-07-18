@@ -1,10 +1,12 @@
 #pragma once
 
+/* Standard library include */
 #include <stdint.h>
 
-
+/* Typedefs */
 typedef uint8_t light_set_t;
 
+/* Enums */
 enum light_id
 {
 	LIGHT_FRONTRIGHT = 		0,
@@ -13,12 +15,16 @@ enum light_id
 	LIGHT_BACKLEFT = 		2
 };
 
-/* Function that read set from lamp and sets the LEDs */
+/* Function prototypes */
+/* Reading set from lamps and sets the LEDs function */
 void driver_light_setlight(uint8_t set, enum light_id);
 
+/* Sending light codes function */
 void driver_light_send_sets(void);
 
-void driver_light_sending_complete(void);
+/* End of sending function */
+void driver_light_sending_completed(void);
 
+/* Init function */
 void driver_light_init(void);
 
