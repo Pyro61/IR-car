@@ -1,11 +1,14 @@
 #pragma once
 
+/* Standard library include */
 #include "stdint.h"
 
 
+/* Typedefs */
 typedef uint8_t addr_t;
 typedef uint8_t button_code_t;
 
+/* Enum declarations */
 enum msg_state
 {
 	MSG_UNKNOWN,
@@ -15,6 +18,7 @@ enum msg_state
 	MSG_READY
 };
 
+/* Structure declarations */
 struct msg_frame
 {
 	addr_t addr;
@@ -23,11 +27,12 @@ struct msg_frame
 	button_code_t inv_cmd;
 };
 
-
+/* Function prototypes */
+/* IR received interrupt handler */
 void driver_ir_remote_IRQ(volatile struct msg_frame *msg_buffer);
 
-void driver_ir_remote_init(void);
-
+/* Checking msg state function */
 enum msg_state driver_ir_remote_check_msg_state(void);
 
-
+/* Init function */
+void driver_ir_remote_init(void);

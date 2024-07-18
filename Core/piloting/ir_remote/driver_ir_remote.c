@@ -1,20 +1,29 @@
+/* Module header include */
 #include <ir_remote/driver_ir_remote.h>
+
+/* Board hardware include */
 #include "tim.h"
+
+/* Standard library include */
 #include "stdbool.h"
 
+/* Defines */
+#define MSG_SIZE				32
 
-#define MSG_SIZE			32
+#define ADDR_MASK				0
+#define INV_ADDR_MASK			8
+#define CMD_MASK				16
+#define INV_CMD_MASK			24
 
-#define ADDR_MASK			0
-#define INV_ADDR_MASK		8
-#define CMD_MASK			16
-#define INV_CMD_MASK		24
+#define ADDR_ERROR				0xFF
+#define CMD_ERROR				0xFE
 
-#define ADDR_ERROR			0xFF
-#define CMD_ERROR			0xFE
+#define WRITE_ONE_HIGHEST_BIT	0x80000000
 
+/* Typedefs */
 typedef uint32_t time_us_t;
 
+/* Enum declarations */
 enum pulse
 {
 	PULSE_NONE,
@@ -24,13 +33,17 @@ enum pulse
 	PULSE_REPEAT
 };
 
+/* Vatiables */
 volatile static uint32_t received_msg;
 static uint8_t received_bits;
+
 static enum msg_state msg_state_flag = MSG_UNKNOWN;
 
+/* Must be not static, changed to true in piloting module */
 bool is_cmd_executed = false;
 
-
+/* Static function definitions */
+/* Calculating received from ir received pulse function */
 static enum pulse calc_pulse(time_us_t time)
 {
 	if (time < 250)
@@ -65,6 +78,7 @@ static enum pulse calc_pulse(time_us_t time)
 }
 
 
+/* Checking received data correctness functions */
 static bool check_addr_correctness(addr_t addr, addr_t inv_addr)
 {
 	if (addr != ((~inv_addr) & 0xFF))
@@ -91,6 +105,7 @@ static bool check_cmd_correctness(addr_t cmd, addr_t inv_cmd)
 }
 
 
+/* Merging received message function */
 static void merge_msg(volatile struct msg_frame *msg_buffer)
 {
 	msg_state_flag = MSG_MERGING;
@@ -119,6 +134,9 @@ static void merge_msg(volatile struct msg_frame *msg_buffer)
 	is_cmd_executed = false;
 }
 
+
+/* Function definitions */
+/* Received pulse from ir received interrupt handler */
 void driver_ir_remote_IRQ(volatile struct msg_frame *msg_buffer)
 {
 	enum pulse received_pulse = calc_pulse(HAL_TIM_ReadCapturedValue(&htim15, TIM_CHANNEL_1));
@@ -136,6 +154,7 @@ void driver_ir_remote_IRQ(volatile struct msg_frame *msg_buffer)
 		return;
 	}
 
+	/* All message bits are received */
 	if (received_bits >= MSG_SIZE)
 	{
 		merge_msg(msg_buffer);
@@ -153,7 +172,7 @@ void driver_ir_remote_IRQ(volatile struct msg_frame *msg_buffer)
 
 		case PULSE_1:
 		{
-			received_msg = (received_msg >> 1) | 0x80000000;
+			received_msg = (received_msg >> 1) | WRITE_ONE_HIGHEST_BIT;
 			received_bits++;
 			break;
 		}
@@ -177,12 +196,14 @@ void driver_ir_remote_IRQ(volatile struct msg_frame *msg_buffer)
 }
 
 
+/* Checking msg_state function */
 enum msg_state driver_ir_remote_check_msg_state(void)
 {
 	return msg_state_flag;
 }
 
 
+/* Init function */
 void driver_ir_remote_init(void)
 {
 	HAL_TIM_Base_Start(&htim15);
