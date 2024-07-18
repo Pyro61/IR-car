@@ -2,7 +2,6 @@
 
 /* Standard library includes */
 #include <stdint.h>
-#include <stdbool.h>
 
 /* Typedefs */
 typedef int16_t motorspeed_t;
@@ -22,11 +21,6 @@ struct motor
     enum motor_direction direction;
     const uint8_t motor_id;
 };
-
-//extern struct motor motor_frontright;
-//extern struct motor motor_frontleft;
-//extern struct motor motor_backright;
-//extern struct motor motor_backleft;
 
 /* Function prototypes */
 /* Stopping all motors function */
