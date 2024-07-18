@@ -1,20 +1,28 @@
+/* Module include */
 #include "piloting.h"
+
+/* Other modules includes */
 #include "ir_remote/ir_remote.h"
 #include "ir_remote/ir_remote_buttons_codes.h"
 #include "setter.h"
 #include "safe_state.h"
-#include <stdbool.h>
-#include "gpio.h"
 
+/* Standard library include */
+#include <stdbool.h>
+
+/* Defines */
 #define COMMANDS_NUM		10
 #define INVALID_BUTTON		0xEE
 
+/* Typedefs */
 typedef void (*cmd_funptr_t)(void);
 typedef uint8_t cmd_code_t;
 
+/* Variables */
 /* Flag changed to false when the remote message is ready and changed to true after executing the command */
 extern bool is_cmd_executed;
 
+/* Commands from the ir remote array */
 static const cmd_funptr_t cmd_table[COMMANDS_NUM] =
 {
 	&stop,
@@ -30,6 +38,7 @@ static const cmd_funptr_t cmd_table[COMMANDS_NUM] =
 };
 
 
+/* Static function definitions */
 static cmd_code_t decode_button_code(button_code_t code)
 {
 	switch (code)
@@ -93,6 +102,7 @@ static cmd_code_t decode_button_code(button_code_t code)
 }
 
 
+/* Function definitions */
 void execute_cmd_if_pending(void)
 {
 	/* Check if command was already executed */
@@ -125,5 +135,4 @@ void execute_cmd_if_pending(void)
 
 	cmd_table[cmd]();
 	is_cmd_executed = true;
-	//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 }
