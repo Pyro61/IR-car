@@ -4,10 +4,18 @@
 /* Driver includes */
 #include "driver_distsensor.h"
 
+/* Structure declarations */
+struct distsensor
+{
+    distcm_t assumed_dist;
+    distcm_t current_dist;
+    bool is_obst_inrange;
+};
+
 /* Variables */
 /* Structures */
-struct distsensor distsensor_front;
-struct distsensor distsensor_back;
+static struct distsensor distsensor_front;
+static struct distsensor distsensor_back;
 
 /* Static function definitions */
 static void distsensor_init(struct distsensor *distsensor)
