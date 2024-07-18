@@ -26,16 +26,13 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
-#include "light.h"
-#include "driver_soundsignal.h" // do testów, pozniej sam piloting w mainie
-#include "driver_distsensor.h"
 #include "distsensor.h"
+#include "light.h"
 #include "piloting.h"
 #include "motor.h"
+#include "soundsignal.h"
 #include "setter.h"
 #include "ir_remote/ir_remote.h"
-#include "soundsignal.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,7 +42,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define ASSUMED_DIST_FRONT	15.0f
+#define ASSUMED_DIST_BACK	15.0f
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -67,21 +65,15 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-
-}
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	/* Front distance sensor measurement end */
+	/* Front distance sensor measurement end interrupt handler */
 	if (&htim8 == htim)
 	{
 		distsensor_calc_dist_front();
 	}
 
-	/* Back distance sensor measurement end */
+	/* Back distance sensor measurement end interrupt handler */
 	if (&htim1 == htim)
 	{
 		distsensor_calc_dist_back();
@@ -91,15 +83,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 {
-	light_sending_complete();
+	/* Sending light settings completed interrupt handler */
+	if (&hspi2 == hspi)
+	{
+		light_sending_completed_callback();
+	}
+
 }
+
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-  if (htim == &htim15)
-  {
-	  ir_remote_IRQ();
-  }
+	/* IR remote message incoming interrupt handler */
+	if (&htim15 == htim)
+	{
+		ir_remote_IRQ();
+	}
 }
 
 /* USER CODE END 0 */
@@ -137,6 +136,7 @@ int main(void)
   MX_SPI2_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
+  MX_TIM6_Init();
   MX_TIM4_Init();
   MX_TIM8_Init();
   MX_SPI3_Init();
@@ -149,7 +149,7 @@ int main(void)
   ir_remote_init();
   motor_initall();
   soundsignal_init();
-  distsensor_initall(15.0f, 15.0f);
+  distsensor_initall(ASSUMED_DIST_FRONT, ASSUMED_DIST_BACK);
 
   /* USER CODE END 2 */
 
@@ -160,6 +160,9 @@ int main(void)
 	  execute_cmd_if_pending();
 	  light_readset_all_if_changed_and_send_sets();
 	  check_distance_from_obstacles_and_eventually_stop_motors();
+
+	  /* Wait for interrupt */
+	  __WFI();
 
     /* USER CODE END WHILE */
 

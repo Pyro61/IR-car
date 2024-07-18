@@ -76,21 +76,14 @@ void Error_Handler(void);
 #define SOUNDSIGNAL_PWM_GPIO_Port GPIOA
 #define MOTOR_GPIO_LEFT_Pin GPIO_PIN_0
 #define MOTOR_GPIO_LEFT_GPIO_Port GPIOB
-#define NRF24_CE_Pin GPIO_PIN_9
-#define NRF24_CE_GPIO_Port GPIOC
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
 #define MOTOR_PWM_LEFT_Pin GPIO_PIN_15
 #define MOTOR_PWM_LEFT_GPIO_Port GPIOA
-#define NRF24_IRQ_Pin GPIO_PIN_2
-#define NRF24_IRQ_GPIO_Port GPIOD
-#define NRF24_IRQ_EXTI_IRQn EXTI2_IRQn
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
-#define NRF24_CSN_Pin GPIO_PIN_9
-#define NRF24_CSN_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
