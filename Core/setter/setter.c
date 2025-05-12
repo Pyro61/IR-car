@@ -1,18 +1,24 @@
+/* Module header include */
 #include "setter.h"
+
+/* Other module includes */
 #include "motor.h"
 #include "light.h"
 #include "distsensor.h"
 #include "soundsignal.h"
 #include "safe_state.h"
-#include <stdbool.h>
-#include "gpio.h"
 
+/* Standard library include */
+#include <stdbool.h>
+
+/* Enum declarations */
 enum state
 {
 	OFF,
 	ON
 };
 
+/* Variables */
 enum state light_normal_state = OFF;
 enum state light_turnright_state = OFF;
 enum state light_turnleft_state = OFF;
@@ -23,9 +29,10 @@ enum state horn_state = OFF;
 static bool can_drive_forward = true;
 static bool can_drive_backwards = true;
 
-
 static enum motor_direction drive_direction = MOTOR_DIRECTION_STOP;
 
+/* Function prototypes */
+/* Driving functions */
 void stop(void)
 {
 	drive_direction = MOTOR_DIRECTION_STOP;
@@ -35,6 +42,7 @@ void stop(void)
 	light_seton_stopback();
 	light_setoff_reversingback();
 }
+
 
 void accelerate_forward_to_max_if_can_drive(void)
 {
@@ -90,6 +98,7 @@ void turn_left(void)
 }
 
 
+/* Light functions */
 void change_light_normal(void)
 {
 	if (OFF == light_normal_state)
@@ -170,6 +179,7 @@ void change_light_emergency(void)
 }
 
 
+/* Sound signal function */
 void horn(void)
 {
 	if (OFF == horn_state)
@@ -186,39 +196,44 @@ void horn(void)
 }
 
 
+/* Giving permission to drive function */
 void check_distance_from_obstacles_and_eventually_stop_motors()
 {
+	/* Obstacles detected and driving towards them */
 	if ((true == distsensor_is_obst_inrange_front()) && (MOTOR_DIRECTION_FORWARD == drive_direction))
 	{
 		stop();
 		can_drive_forward = false;
 	}
 
+	/* Obstacles detected but driving backwards/staying */
 	else if (true == distsensor_is_obst_inrange_front())
 	{
 		can_drive_forward = false;
 	}
 
+	/* Obstacles not detected */
 	else
 	{
 		can_drive_forward = true;
 	}
 
-
+	/* Obstacles detected and driving towards them */
 	if ((true == distsensor_is_obst_inrange_back()) && (MOTOR_DIRECTION_BACKWARDS == drive_direction))
 	{
 		stop();
 		can_drive_backwards = false;
 	}
 
+	/* Obstacles detected but driving forward/staying */
 	else if (true == distsensor_is_obst_inrange_back())
 	{
 		can_drive_backwards = false;
 	}
 
+	/* Obstacles not detected */
 	else
 	{
 		can_drive_backwards = true;
 	}
-
 }

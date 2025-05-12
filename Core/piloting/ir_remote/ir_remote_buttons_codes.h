@@ -1,5 +1,6 @@
 #pragma once
 
+/* Defines */
 #define IR_REMOTE_CODE_ONOFF      0x45
 #define IR_REMOTE_CODE_MENU       0x47
 #define IR_REMOTE_CODE_TEST       0x44

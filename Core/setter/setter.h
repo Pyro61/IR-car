@@ -1,7 +1,9 @@
 #pragma once
+
+/* Standard library include */
 #include <stdint.h>
 
-
+/* Function prototypes */
 /* Functions assigned to remote's buttons */
 void stop(void);
 void accelerate_forward_to_max_if_can_drive(void);

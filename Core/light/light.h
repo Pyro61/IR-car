@@ -1,41 +1,32 @@
 #pragma once
 
-#include <stdint.h>
+/* Function prototypes */
+/* Setting on/off light modes functions */
 
-typedef uint8_t light_mode_t;
+void light_seton_normalfront(void);
+void light_setoff_normalfront(void);
 
-struct light
-{
-    light_mode_t normal:1;
-    light_mode_t reversing:1;
-    light_mode_t stop:1;
-    light_mode_t turn:1;
-    light_mode_t emergency:1;
-    light_mode_t turn_activate:1;
-    light_mode_t emergency_activate:1;
-};
-
-//extern struct light light_frontright;
-//extern struct light light_frontleft;
-//extern struct light light_backright;
-//extern struct light light_backleft;
-
-
-
-void light_seton_normalfront(void); //z pilota
-void light_setoff_normalfront(void); // z pilota
 void light_seton_reversingback(void);
 void light_setoff_reversingback(void);
+
 void light_seton_stopback(void);
 void light_setoff_stopback(void);
-void light_seton_turnright(void); // z pilota
-void light_setoff_turnright(void); // z pilota
-void light_seton_turnleft(void); // z pilota
-void light_setoff_turnleft(void); // z pilota
-void light_seton_emergencyall(void); // z pilota
-void light_setoff_emergencyall(void); // z pilota
 
+void light_seton_turnright(void);
+void light_setoff_turnright(void);
+
+void light_seton_turnleft(void);
+void light_setoff_turnleft(void);
+
+void light_seton_emergencyall(void);
+void light_setoff_emergencyall(void);
+
+/* Reading light sets and send to hardware driver function */
 void light_readset_all_if_changed_and_send_sets(void);
 
+/* Sending completed callback */
+void light_sending_completed_callback(void);
+
+/* Init function */
 void light_initall(void);
-void light_sending_complete(void);
+

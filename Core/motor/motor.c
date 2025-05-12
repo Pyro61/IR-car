@@ -26,13 +26,13 @@
 typedef int8_t gear_t;
 
 /* Variables */
-gear_t gear = 0;
+static gear_t gear = 0;
 
 /* Structures */
-struct motor motor_frontright = {0, MOTOR_DIRECTION_STOP, 0};
-struct motor motor_frontleft = {0, MOTOR_DIRECTION_STOP, 1};
-struct motor motor_backright = {0, MOTOR_DIRECTION_STOP, 2};
-struct motor motor_backleft = {0, MOTOR_DIRECTION_STOP, 3};
+static struct motor motor_frontright = {0, MOTOR_DIRECTION_STOP, 0};
+static struct motor motor_frontleft = {0, MOTOR_DIRECTION_STOP, 1};
+static struct motor motor_backright = {0, MOTOR_DIRECTION_STOP, 2};
+static struct motor motor_backleft = {0, MOTOR_DIRECTION_STOP, 3};
 
 
 /* Static function definitions */

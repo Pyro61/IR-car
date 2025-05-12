@@ -2,3 +2,6 @@ Debug/
 .settings
 .cproject
 .project
+*.launch
+*.ioc
+*.mxproject

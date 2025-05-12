@@ -1,20 +1,28 @@
+/* Module include */
 #include "soundsignal.h"
-#include "driver_soundsignal.h"
-#include "event.h"
-#include "stdbool.h"
 
+/* Driver include */
+#include "driver_soundsignal.h"
+
+/* Other module include */
+#include "event.h"
+
+/* Enum declarations */
 enum state
 {
 	OFF	= 0,
 	ON	= 1
 };
 
+/* Varaibles */
 enum state turn_state = OFF;
 enum state emergency_state = OFF;
 
 enum state turn_activate = OFF;
 enum state emergency_activate = OFF;
 
+/* Static function definitions */
+/* Turning on/off turn sound signal 500ms if activated */
 static void soundsignal_change_turn(void)
 {
 	if (ON == emergency_activate)
@@ -44,6 +52,7 @@ static void soundsignal_change_turn(void)
 }
 
 
+/* Changing on/off emergency signal every 300ms if activated */
 static void soundsignal_change_emergency(void)
 {
 	if (OFF == emergency_activate)
@@ -68,6 +77,8 @@ static void soundsignal_change_emergency(void)
 }
 
 
+/* Function definitions */
+/* Turning on functions */
 void soundsignal_on_horn(void)
 {
     driver_soundsignal_on_horn();
@@ -92,6 +103,7 @@ void soundsignal_on_distsensorblock(void)
 }
 
 
+/* Turning off functions */
 void soundsignal_off_horn(void)
 {
     driver_soundsignal_off_horn();
@@ -116,6 +128,7 @@ void soundsignal_off_distsensorblock(void)
 }
 
 
+/* Init function */
 void soundsignal_init(void)
 {
 	subscribe_500ms(&soundsignal_change_turn);
